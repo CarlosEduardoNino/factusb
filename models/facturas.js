@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
 const InvoiceSchema = new mongoose.Schema({
-    numberingRangeId: { type: Number, required: true },
+    numberingRangeId: { type: Number, },
     referenceCode: { type: String, required: true },
     observation: { type: String, default: '' },
     paymentForm: { type: String, required: true },
