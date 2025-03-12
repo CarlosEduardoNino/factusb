@@ -1,4 +1,4 @@
-import Invoice from "../models/facturas.js";
+import facturas from "../models/facturas.js";
 import User from "../models/usuarios.js";
 import Product from "../models/servicios.js";
 import axios from "axios";
@@ -176,7 +176,7 @@ const convertToFactusFormat = async (invoiceData) => {
  */
 const createInvoice = async (req, res) => {
     try {
-        const newInvoice = new Invoice(req.invoiceData);
+        const newInvoice = new facturas(req.invoiceData);
         const savedInvoice = await newInvoice.save();
         res.status(201).json({ message: "Factura guardada localmente", data: savedInvoice });
     } catch (error) {
@@ -222,7 +222,7 @@ const validateInvoiceWithFactus = async (req, res) => {
 
 const getAllInvoices = async (req, res) => {
     try {
-        const invoices = await Invoice.find()
+        const invoices = await facturas.find()
             .populate('customer')
             .populate('items.product');
         res.json(invoices);
@@ -236,7 +236,7 @@ const getAllInvoices = async (req, res) => {
  */
 const getInvoiceById = async (req, res) => {
     try {
-        const invoice = await Invoice.findById(req.params.id)
+        const invoice = await facturas.findById(req.params.id)
             .populate('customer')
             .populate('items.product');
         

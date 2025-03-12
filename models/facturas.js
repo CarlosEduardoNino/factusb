@@ -15,7 +15,8 @@ const InvoiceSchema = new mongoose.Schema({
     },
     customer: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     items: [{
-        product: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', required: true },
+        product: { type: mongoose.Schema.Types.ObjectId, ref: 'servicio', required: true },
+        
         quantity: { type: Number, required: true },
         discountRate: { type: Number, default: 0 },
         withholdingTaxes: [{
@@ -25,4 +26,4 @@ const InvoiceSchema = new mongoose.Schema({
     }]
 }, { timestamps: true });
 
-export default mongoose.model('Invoice', InvoiceSchema);
+export default mongoose.model('facturass', InvoiceSchema);

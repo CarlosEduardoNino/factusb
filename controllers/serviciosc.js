@@ -1,4 +1,4 @@
-import Product from '../models/servicios.js';
+import servicio from '../models/servicios.js';
 
 /**
  * POST /products
@@ -9,12 +9,12 @@ const createProduct = async (req, res) => {
         const { codeReference } = req.body;
         
         // Verificar si el producto ya existe
-        const existingProduct = await Product.findOne({ codeReference });
+        const existingProduct = await servicio.findOne({ codeReference });
         if (existingProduct) {
             return res.status(400).json({ message: 'El producto ya existe con este código de referencia' });
         }
         
-        const newProduct = new Product(req.body);
+        const newProduct = new servicio(req.body);
         const savedProduct = await newProduct.save();
         res.status(201).json(savedProduct);
     } catch (error) {
@@ -28,7 +28,7 @@ const createProduct = async (req, res) => {
  */
 const getAllProducts = async (req, res) => {
     try {
-        const products = await Product.find();
+        const products = await servicio.find();
         res.status(200).json(products);
     } catch (error) {
         res.status(500).json({ message: 'Error al obtener productos', error: error.message });
@@ -41,7 +41,7 @@ const getAllProducts = async (req, res) => {
  */
 const getProductById = async (req, res) => {
     try {
-        const product = await Product.findById(req.params.id);
+        const product = await servicio.findById(req.params.id);
         if (!product) {
             return res.status(404).json({ message: 'Producto no encontrado' });
         }
@@ -61,7 +61,7 @@ const updateProduct = async (req, res) => {
         
         // Verificar si el código de referencia ya existe en otro producto
         if (req.body.codeReference) {
-            const existingProduct = await Product.findOne({ 
+            const existingProduct = await servicio.findOne({ 
                 codeReference: req.body.codeReference, 
                 _id: { $ne: id } 
             });
@@ -74,7 +74,7 @@ const updateProduct = async (req, res) => {
         }
         
         // Buscar y actualizar el producto
-        const updatedProduct = await Product.findByIdAndUpdate(
+        const updatedProduct = await servicio.findByIdAndUpdate(
             id, 
             req.body, 
             { new: true, runValidators: true }

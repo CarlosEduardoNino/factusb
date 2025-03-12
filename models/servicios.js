@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
 const ProductSchema = new mongoose.Schema({
-    codeReference: { type: String, unique: true, sparse: true,  required: true },
+    codeReference: { type: String,   required: true },
     name: { type: String, required: true },
     price: { type: Number, required: true },
     taxRate: { type: Number, required: true },
@@ -11,4 +11,4 @@ const ProductSchema = new mongoose.Schema({
     tributeId: { type: Number, required: true }
 }, { timestamps: true });
 
-export default mongoose.model('Product', ProductSchema);
+export default mongoose.model('servicio', ProductSchema);
