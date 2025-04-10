@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
 const UserSchema = new mongoose.Schema({
-    identification: { type: String, required: true, unique: true },
+    identification: { type: String, required: true, unique: false },
     dv: { type: String, required: true },
     company: { type: String, default: '' },
     tradeName: { type: String, default: '' },
@@ -15,4 +15,4 @@ const UserSchema = new mongoose.Schema({
     municipalityId: { type: String, required: true }
 }, { timestamps: true });
 
-export default mongoose.model('User', UserSchema);
+export default mongoose.model('Usuarios', UserSchema);

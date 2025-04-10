@@ -13,12 +13,7 @@ const InvoiceSchema = new mongoose.Schema({
     endDate: { type: Date, required: true },
     endTime: { type: String, required: true }
   },
-  status: {
-    type: String,
-    enum: ['pending', 'validated', 'error'],
-    default: 'pending'
-  },
-  customer: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  customer: { type: mongoose.Schema.Types.ObjectId, ref: 'Usuarios', required: true },
   items: [{
     product: { type: mongoose.Schema.Types.ObjectId, ref: 'servicio', required: true },
     quantity: { type: Number, required: true },
@@ -28,14 +23,11 @@ const InvoiceSchema = new mongoose.Schema({
       withholdingTaxRate: { type: Number, required: true }
     }]
   }],
-  // Nuevos campos para almacenar datos devueltos por Factus
   factusData: {
-    invoice_id: { type: String },
-    cufe: { type: String },
-    qr: { type: String },
-    public_url: { type: String }
+    type: mongoose.Schema.Types.Mixed,
+    default: {}
   },
-  isValidated: { type: Boolean, default: false }
+
 }, { timestamps: true });
 
 export default mongoose.model('facturass', InvoiceSchema);

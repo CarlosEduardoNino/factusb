@@ -12,4 +12,5 @@ router.get('/', getAllUsers);
 // Ruta para obtener un usuario por su ID
 router.get('/:id', getUserById);
 
+
 export default router;

@@ -1,5 +1,5 @@
 import facturas from "../models/facturas.js";
-import User from "../models/usuarios.js";
+import Users from "../models/usuarios.js";
 import Product from "../models/servicios.js";
 import axios from "axios";
 
@@ -29,9 +29,9 @@ const transformInvoiceData = async (req, res, next) => {
         municipalityId: req.body.customer.municipality_id
       };
 
-      let customer = await User.findOne({ identification: userData.identification });
+      let customer = await Users.findOne({ identification: userData.identification });
       if (!customer) {
-        customer = await User.create(userData);
+        customer = await Users.create(userData);
       }
 
       // Transformar productos
@@ -82,10 +82,10 @@ const transformInvoiceData = async (req, res, next) => {
         customer: customer._id,
         items: transformedItems
       };
-    } 
+    }
     // Si la petición viene en formato local (con IDs)
     else {
-      const customer = await User.findById(req.body.customer);
+      const customer = await Users.findById(req.body.customer);
       if (!customer) {
         return res.status(400).json({ message: "Cliente no encontrado" });
       }
@@ -120,64 +120,63 @@ const transformInvoiceData = async (req, res, next) => {
  * Función auxiliar para convertir datos al formato requerido por Factus.
  */
 const convertToFactusFormat = async (invoiceData) => {
-    // Obtener datos del cliente
-    const customer = await User.findById(invoiceData.customer);
-  
-    // Transformar cada item para que cumpla con la estructura requerida
-    const items = await Promise.all(
-      invoiceData.items.map(async (item) => {
-        const product = await Product.findById(item.product);
-        return {
-          code_reference: product.codeReference, // ejemplo: "12345"
-          name: product.name,                      // ejemplo: "producto de prueba"
-          quantity: item.quantity,                 // ejemplo: 1
-          discount_rate: item.discountRate || 0,   // ejemplo: 20
-          price: product.price,                    // ejemplo: 50000
-          tax_rate: product.taxRate.toFixed(2),      // ejemplo: "19.00"
-          unit_measure_id: product.unitMeasureId,    // ejemplo: 70
-          standard_code_id: product.standardCodeId,  // ejemplo: 1
-          is_excluded: product.isExcluded ? 1 : 0,     // ejemplo: 0
-          tribute_id: product.tributeId,             // ejemplo: 1
-          // Para cada retención, convertir el rate a string si es necesario
-          withholding_taxes: item.withholdingTaxes.map(tax => ({
-            code: tax.code,
-            withholding_tax_rate: tax.withholdingTaxRate.toString()
-          }))
-        };
-      })
-    );
-  
-    // Retornar el objeto con la estructura que espera Factus
-    return {
-      reference_code: invoiceData.referenceCode,
-      observation: invoiceData.observation,
-      payment_form: invoiceData.paymentForm,
-      payment_due_date: invoiceData.paymentDueDate,
-      payment_method_code: invoiceData.paymentMethodCode,
-      billing_period: {
-        start_date: invoiceData.billingPeriod.startDate,
-        start_time: invoiceData.billingPeriod.startTime,
-        end_date: invoiceData.billingPeriod.endDate,
-        end_time: invoiceData.billingPeriod.endTime
-      },
-      customer: {
-        identification: customer.identification,
-        dv: customer.dv,
-        company: customer.company,
-        trade_name: customer.tradeName,
-        names: customer.names,
-        address: customer.address,
-        email: customer.email,
-        phone: customer.phone,
-        legal_organization_id: customer.legalOrganizationId,
-        tribute_id: customer.tributeId,
-        identification_document_id: customer.identificationDocumentId,
-        municipality_id: customer.municipalityId
-      },
-      items: items
-    };
+  // Obtener datos del cliente
+  const customer = await Users.findById(invoiceData.customer);
+
+  // Transformar cada item para que cumpla con la estructura requerida
+  const items = await Promise.all(
+    invoiceData.items.map(async (item) => {
+      const product = await Product.findById(item.product);
+      return {
+        code_reference: product.codeReference, // ejemplo: "12345"
+        name: product.name,                      // ejemplo: "producto de prueba"
+        quantity: item.quantity,                 // ejemplo: 1
+        discount_rate: item.discountRate || 0,   // ejemplo: 20
+        price: product.price,                    // ejemplo: 50000
+        tax_rate: product.taxRate.toFixed(2),      // ejemplo: "19.00"
+        unit_measure_id: product.unitMeasureId,    // ejemplo: 70
+        standard_code_id: product.standardCodeId,  // ejemplo: 1
+        is_excluded: product.isExcluded ? 1 : 0,     // ejemplo: 0
+        tribute_id: product.tributeId,             // ejemplo: 1
+        // Para cada retención, convertir el rate a string si es necesario
+        withholding_taxes: item.withholdingTaxes.map(tax => ({
+          code: tax.code,
+          withholding_tax_rate: tax.withholdingTaxRate.toString()
+        }))
+      };
+    })
+  );
+
+  // Retornar el objeto con la estructura que espera Factus
+  return {
+    reference_code: invoiceData.referenceCode,
+    observation: invoiceData.observation,
+    payment_form: invoiceData.paymentForm,
+    payment_due_date: invoiceData.paymentDueDate,
+    payment_method_code: invoiceData.paymentMethodCode,
+    billing_period: {
+      start_date: invoiceData.billingPeriod.startDate,
+      start_time: invoiceData.billingPeriod.startTime,
+      end_date: invoiceData.billingPeriod.endDate,
+      end_time: invoiceData.billingPeriod.endTime
+    },
+    customer: {
+      identification: customer.identification,
+      dv: customer.dv,
+      company: customer.company,
+      trade_name: customer.tradeName,
+      names: customer.names,
+      address: customer.address,
+      email: customer.email,
+      phone: customer.phone,
+      legal_organization_id: customer.legalOrganizationId,
+      tribute_id: customer.tributeId,
+      identification_document_id: customer.identificationDocumentId,
+      municipality_id: customer.municipalityId
+    },
+    items: items
   };
-  
+};
 
 /**
  * Controlador para crear factura local.
@@ -227,59 +226,55 @@ const validateInvoiceWithFactus = async (req, res) => {
   }
 };
 
-/**
- * Controlador combinado para crear y validar la factura.
- * Este flujo guarda la factura localmente, la valida con Factus y actualiza el registro con los datos devueltos.
- */
+
 const createAndValidateInvoice = async (req, res) => {
-    try {
-      // 1. Guardar la factura localmente
-      const newInvoice = new facturas(req.invoiceData);
-      const savedInvoice = await newInvoice.save();
-  
-      // 2. Convertir datos al formato que requiere Factus
-      const factusInvoice = await convertToFactusFormat(req.invoiceData);
-      console.log("Objeto enviado a Factus:", JSON.stringify(factusInvoice, null, 2));
-  
-      // 3. Validar con Factus usando el endpoint de validación
-      const authToken = req.headers.authorization;
-      if (!authToken || !authToken.startsWith("Bearer ")) {
-        return res.status(401).json({ message: "Token de autenticación no proporcionado o inválido" });
-      }
-  
-      const factusResponse = await axios.post(FACTUS_VALIDATE_URL, factusInvoice, {
-        headers: { Authorization: authToken, "Content-Type": "application/json" }
-      });
-  
-      // 4. Procesar la respuesta de Factus
-      const billData = factusResponse.data.data.bill;
-      const factusData = {
-        invoice_id: factusResponse.data.invoice_id,
-        cufe: billData.cufe,
-        qr: billData.qr,
-        public_url: billData.public_url
-      };
-  
-      // 5. Actualizar la factura local con los datos devueltos
-      const updatedInvoice = await facturas.findByIdAndUpdate(
-        savedInvoice._id,
-        { factusData: factusData, status: 'validated' },
-        { new: true }
-      );
-  
-      res.status(201).json({
-        message: "Factura guardada localmente y validada con éxito",
-        data: updatedInvoice
-      });
-    } catch (error) {
-      console.error("Error al procesar la factura:", error.response?.data || error.message);
-      res.status(500).json({
-        message: "Error al procesar la factura",
-        error: error.response?.data || error.message
-      });
+  try {
+    // 1. Guardar la factura localmente
+    const newInvoice = new facturas(req.invoiceData);
+    const savedInvoice = await newInvoice.save();
+
+    // 2. Convertir datos al formato que requiere Factus
+    const factusInvoice = await convertToFactusFormat(req.invoiceData);
+    console.log("Objeto enviado a Factus:", JSON.stringify(factusInvoice, null, 2));
+
+    // 3. Validar con Factus usando el endpoint de validación
+    const authToken = req.headers.authorization;
+    if (!authToken || !authToken.startsWith("Bearer ")) {
+      return res.status(401).json({ message: "Token de autenticación no proporcionado o inválido" });
     }
-  };
-  
+
+    const factusResponse = await axios.post(FACTUS_VALIDATE_URL, factusInvoice, {
+      headers: { Authorization: authToken, "Content-Type": "application/json" }
+    });
+
+    
+    const factusData = {
+      invoice_id: factusResponse.data.invoice_id,
+      ...factusResponse.data.data.bill  
+    };
+
+    // 5. Actualizar la factura local con los datos devueltos
+    const updatedInvoice = await facturas.findByIdAndUpdate(
+      savedInvoice._id,
+      { 
+        factusData: factusData, 
+        status: 'validated' 
+      },
+      { new: true }
+    );
+
+    res.status(201).json({
+      message: "Factura guardada localmente y validada con éxito",
+      data: updatedInvoice
+    });
+  } catch (error) {
+    console.error("Error al procesar la factura:", error.response?.data || error.message);
+    res.status(500).json({
+      message: "Error al procesar la factura",
+      error: error.response?.data || error.message
+    });
+  }
+};
 
 /**
  * Controlador para obtener todas las facturas.
@@ -317,11 +312,11 @@ const getInvoiceById = async (req, res) => {
   }
 };
 
-export { 
-  createInvoice, 
-  validateInvoiceWithFactus, 
-  transformInvoiceData, 
-  getAllInvoices, 
-  getInvoiceById, 
-  createAndValidateInvoice 
+export {
+  createInvoice,
+  validateInvoiceWithFactus,
+  transformInvoiceData,
+  getAllInvoices,
+  getInvoiceById,
+  createAndValidateInvoice
 };

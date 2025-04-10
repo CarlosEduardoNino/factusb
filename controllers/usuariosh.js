@@ -1,4 +1,4 @@
-import User from '../models/usuarios.js';
+import Users from '../models/usuarios.js';
 
 /**
  * POST /users
@@ -9,14 +9,14 @@ const createUser = async (req, res) => {
         const { identification, email } = req.body;
 
         // Verificar si el usuario ya existe por identificación o email
-        const existingUser = await User.findOne({ 
+        const existingUser = await Users.findOne({ 
             $or: [{ identification }, { email }] 
         });
         if (existingUser) {
             return res.status(400).json({ message: 'Usuario ya existe con esta identificación o email' });
         }
 
-        const newUser = new User(req.body);
+        const newUser = new Users(req.body);
         const savedUser = await newUser.save();
         res.status(201).json(savedUser);
     } catch (error) {
@@ -30,7 +30,7 @@ const createUser = async (req, res) => {
  */
 const getAllUsers = async (req, res) => {
     try {
-        const users = await User.find();
+        const users = await Users.find();
         res.status(200).json(users);
     } catch (error) {
         res.status(500).json({ message: 'Error al obtener usuarios', error: error.message });
@@ -43,7 +43,7 @@ const getAllUsers = async (req, res) => {
  */
 const getUserById = async (req, res) => {
     try {
-        const user = await User.findById(req.params.id);
+        const user = await Users.findById(req.params.id);
         if (!user) {
             return res.status(404).json({ message: 'Usuario no encontrado' });
         }
