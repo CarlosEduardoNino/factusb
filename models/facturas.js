@@ -30,4 +30,4 @@ const InvoiceSchema = new mongoose.Schema({
 
 }, { timestamps: true });
 
-export default mongoose.model('facturass', InvoiceSchema);
+export default mongoose.model('facturas', InvoiceSchema);
